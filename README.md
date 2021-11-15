@@ -1,2 +1,2 @@
 # CV.JayaIndahTea
- program KP
+ Program KP

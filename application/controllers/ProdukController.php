@@ -35,8 +35,8 @@ class ProdukController extends CI_Controller{
 
     protected function setValidationRules()
 	{
-		$this->form_validation->set_rules('id_produk', 'ID Produk', 'trim|required|max_length[128]');
-		$this->form_validation->set_rules('nama_produk', 'Nama Produk', 'trim|required');
+		$this->form_validation->set_rules('id_produk', 'ID Produk', 'required');
+		$this->form_validation->set_rules('nama_produk', 'Nama Produk', 'required|max_length[50]');
         
         $this->form_validation->set_message('required','Kosong. Inputkan %s!');
         $this->form_validation->set_message('max_length','Nilai %s melebihi batas.');
@@ -60,7 +60,7 @@ class ProdukController extends CI_Controller{
                 "nama_produk" => $this->input->post("nama_produk"),
             );
 
-			$data['created_at'] = date('Y-m-d H:i:s');
+			$dataPD['created_at'] = date('Y-m-d H:i:s');
 
             $config['upload_path'] = './assets/images/products';
             $config['allowed_types'] = 'gif|jpg|png|jpeg';
@@ -70,24 +70,24 @@ class ProdukController extends CI_Controller{
                 //
                 if($this->ProdukModel->insert_Produk($dataPD)){  
                     $this->session->set_flashdata('success', 'Data Produk berhasil ditambahkan');
-                    redirect(site_url("ProdukController"));
+                    redirect(site_url("products"));
                 }else{
-                    redirect(site_url("ProdukController/formcreate"));
+                    redirect(site_url("products/formcreate"));
                 }
             } else {
 
                 if (!$this->upload->do_upload('foto_produk')){
                     $this->session->set_flashdata('error', 'File yang dinputkan tidak sesuai. Masukan file dengan format jpeg, jpg, png atau gif');
-                    redirect(site_url("ProdukController"));
+                    redirect(site_url("products"));
                 } else {
 
                     $upload_data = $this->upload->data();
                     $dataPD['foto_produk'] = base_url("assets/images/products/").$upload_data['file_name'];
                     if($this->ProdukModel->insert_Produk($dataPD)){  
                         $this->session->set_flashdata('success', 'Data Produk berhasil ditambahkan');
-                        redirect(site_url("ProdukController"));
+                        redirect(site_url("products"));
                     }else{
-                        redirect(site_url("ProdukController/formcreate"));
+                        redirect(site_url("products/formcreate"));
                     }
                 }            
             }
@@ -99,7 +99,7 @@ class ProdukController extends CI_Controller{
         }
     }
 
-    function formUpdate($id)
+    public function formUpdate($id)
     {
         $record = $this->ProdukModel->get_ProdukById($id)->row();
 		$data['record'] = $record;
@@ -119,7 +119,7 @@ class ProdukController extends CI_Controller{
                 "nama_produk" => $this->input->post("nama_produk"),
             );
 
-			$data['updated_at'] = date('Y-m-d H:i:s');
+			$dataPD['updated_at'] = date('Y-m-d H:i:s');
 
             $config['upload_path'] = './assets/images/products';
             $config['allowed_types'] = 'gif|jpg|png|jpeg';
@@ -129,25 +129,25 @@ class ProdukController extends CI_Controller{
             if (empty($_FILES['foto_produk']['name'])) {
                 //
                 if($this->ProdukModel->update_Produk($id,$dataPD)){  
-                    $this->session->set_flashdata('success', 'Data Produk berhasil ditambahkan');
-                    redirect(site_url("ProdukController"));
+                    $this->session->set_flashdata('success', 'Data Produk berhasil diedit');
+                    redirect(site_url("products"));
                 }else{
-                    redirect(site_url("ProdukController/formcreate"));
+                    redirect(site_url("products/formcreate"));
                 }
             } else {
 
                 if (!$this->upload->do_upload('foto_produk')){
                     $this->session->set_flashdata('error', 'File yang dinputkan tidak sesuai. Masukan file dengan format jpeg, jpg, png atau gif');
-                    redirect(site_url("ProdukController"));
+                    redirect(site_url("products"));
                 } else {
 
                     $upload_data = $this->upload->data();
                     $dataPD['foto_produk'] = base_url("assets/images/products/").$upload_data['file_name'];
                     if($this->ProdukModel->update_Produk($id,$dataPD)){  
-                        $this->session->set_flashdata('success', 'Data Produk berhasil ditambahkan');
-                        redirect(site_url("ProdukController"));
+                        $this->session->set_flashdata('success', 'Data Produk berhasil diedit');
+                        redirect(site_url("products"));
                     }else{
-                        redirect(site_url("ProdukController/formcreate"));
+                        redirect(site_url("products/formcreate"));
                     }
                 }            
             }
@@ -174,14 +174,14 @@ class ProdukController extends CI_Controller{
             foreach ($new_id as $key) {
                 $auto_id = $key->id_produk;
             }
-            return $id_produk = $this->ProdukModel->get_newid($auto_id,'PD');
+            return $id_produk = $this->ProdukModel->get_newid($auto_id,'PD-');
         } 
     }
 
     public function processDelete($id){
         $this->ProdukModel->delete_Produk($id);
         $this->session->set_flashdata("info", "Data Produk Berhasil Dihapus!");
-        redirect(site_url("ProdukController"));
+        redirect(site_url("products"));
     }
 }
 ?>

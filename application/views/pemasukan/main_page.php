@@ -6,31 +6,24 @@
     <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>
-            <B>Daftar Penjualan Produk</B> 
-            
+            <B>Daftar Pemasukan Kas</B>           
         </h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> Dashboard </a></li>
             <li class="active">Pemasukan</li>
-            <li class="active">Penjualan</li>
-        </ol>
-
-        
-        
+        </ol>    
     </section>
 
     <!-- Main content -->
     <section class="content">
         <div class="row">
             <div class="col-lg-12 col-xs-12">
-            <div class="box">
-                <div class="box-header with-border">
-                    <a href="<?php echo site_url('PemasukanController/formcreate');?>" class="btn btn-default">
-                            <span class="fa fa-plus"></span> &nbsp; Tambah </a> &nbsp;    
-                </div>
-                        <div class="box-body">
-
-                        
+                <div class="box">
+                    <div class="box-header with-border">
+                        <a href="<?php echo site_url('income/formcreate');?>" class="btn btn-default">
+                        <span class="fa fa-plus"></span> &nbsp; Tambah </a> &nbsp;    
+                    </div>
+                    <div class="box-body">
 
                         <?php $this->load->view('templates/flash'); ?>     
                         <!-- Tabel Akun Users -->
@@ -38,10 +31,10 @@
                             <thead>
                                 <tr>
                                     <th>ID</th>
-                                    <th>Nama Produk</th>
-                                    <th>Jenis Pemasukan</th>
-                                   
-                                    <th>Nominal (Rp.)</th>
+                                    
+                                    <th>Kategori Pemasukan</th>
+                                    <th>Keterangan</th>
+                                    <th>Nominal</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
@@ -51,16 +44,13 @@
                                 <tr>
                                     <!-- Memanggil Value pada Tabel Users -->
                                     <td><?php echo $record->id_pemasukan;?></td>
-                                    <td><?php echo $record->nama_produk;?></td>
-                                    <td><?php echo $record->jenis_pemasukan;?></td>
-                                    
-                                    
-                                    <td><?php echo $record->nominal_pemasukan;?></td>
-                                   
+                                    <td><?php echo $record->kategori_pemasukan;?></td>
+                                    <td><?php echo $record->nama_produk;?><?php echo $record->keterangan;?></td>                                
+                                    <td><?php echo "Rp. ".number_format($record->nominal_pemasukan, 0, ".", ".")?></td>                           
                                     <td>
                                         <!-- Button Aksi (Read and Delete) -->
-                                        <a href="<?php echo site_url('PemasukanController/readbyid/'.$record->id_pemasukan) ?>" class="btn btn-warning btn-sm"><span class="glyphicon glyphicon-eye-open"></span></a>
-                                        <a href="<?php echo site_url('PemasukanController/formupdate/'.$record->id_pemasukan) ?>" class="btn btn-info btn-sm"><span class="glyphicon glyphicon-edit"></span></a>
+                                        <a href="<?php echo site_url('income/readbyid/'.$record->id_pemasukan) ?>" class="btn btn-warning btn-sm"><span class="glyphicon glyphicon-eye-open"></span></a>
+                                        <a href="<?php echo site_url('income/formupdate/'.$record->id_pemasukan) ?>" class="btn btn-info btn-sm"><span class="glyphicon glyphicon-edit"></span></a>
                                         <a href="<?php echo site_url('PemasukanController/get_download_byid/'.$record->id_pemasukan) ?>" class="btn btn-success btn-sm"><span class="glyphicon glyphicon-download"></span></a>                                      
                                         <button data-toggle="modal" data-target = "#delete-modal<?php echo $record->id_pemasukan ;?>" class="btn btn-danger btn-sm delete_record"><span class="glyphicon glyphicon-trash"></span></button>
                                     </td>
@@ -92,10 +82,10 @@
                             <tfoot>
                                 <tr>
                                     <th>ID</th>
-                                    <th>Nama Produk</th>
-                                    <th>Jenis Pemasukan</th>
                                     
-                                    <th>Nominal (Rp.)</th>
+                                    <th>Kategori Pemasukan</th>
+                                    <th>Keterangan</th>
+                                    <th>Nominal</th>
                                     <th>Aksi</th>
                                 </tr>
                             </tfoot>

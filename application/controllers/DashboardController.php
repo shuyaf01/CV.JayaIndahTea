@@ -21,26 +21,42 @@ class DashboardController extends CI_Controller {
         }
         $this->load->model("PemasukanModel","",TRUE);
         $this->load->model("PengeluaranModel","",TRUE);
-        $this->load->model("KasModel","",TRUE);
     }
 
 	function index()
     {
-        $data['Total_Pemasukan'] = $this->PemasukanModel->count_Pemasukan();
-        $data['Total_Pengeluaran'] = $this->PengeluaranModel->count_Pengeluaran();
-        $data['dataKas'] = $this->KasModel->get_Kas();
-        $data['Jumlah_Saldo'] = $this->get_lastSaldo();
+        $data['Total_Pemasukan'] = $this->get_countPemasukan();
+        $data['Total_Pengeluaran'] = $this->get_countPengeluaran();
+        $data['Keuntungan'] = $this->get_Keuntungan();
+
         $this->load->view('dashboard', $data);
         $this->load->view('templates/footer'); 
     }
-    
-    function get_lastSaldo(){
-        $get_saldo = $this->KasModel->get_lastSaldo()->result();
-        if($get_saldo > 0) {
-            foreach ($get_saldo as $key) {
-                $last_saldo = $key->saldo;
-            }
-            return $last_saldo;
-        } 
+
+    function get_countPemasukan(){
+        $count_Pemasukan = $this->PemasukanModel->count_Pemasukan();
+        if($count_Pemasukan == NULL) { 
+            $count_Pemasukan = 0;  
+        } else{
+            $count_Pemasukan = $this->PemasukanModel->count_Pemasukan();
+        }
+        return $count_Pemasukan;
+    }
+
+    function get_countPengeluaran(){
+        $count_Pengeluaran = $this->PengeluaranModel->count_Pengeluaran();
+        if($count_Pengeluaran == NULL) { 
+            $count_Pengeluaran = 0;  
+        } else{
+            $count_Pengeluaran = $this->PengeluaranModel->count_Pengeluaran();
+        }
+        return $count_Pengeluaran;
+    }
+
+    function get_Keuntungan(){
+        $count_Pemasukan = $this->PemasukanModel->count_Pemasukan();
+        $count_Pengeluaran = $this->PengeluaranModel->count_Pengeluaran();
+        $keuntungan = $count_Pemasukan - $count_Pengeluaran;
+        return $keuntungan;
     }
 }

@@ -6,6 +6,10 @@ class ProdukModel extends CI_Model {
         return $this->db->get("tb_produk");
     }
 
+    function get_NameProduct(){
+        return $this->db->get("tb_produk")->result();
+    }
+
     function get_ProdukById($id){
         $this->db->where("id_produk",$id);
         return $this->db->get("tb_produk");
@@ -35,14 +39,14 @@ class ProdukModel extends CI_Model {
         return $id_produk;
     }
     
-    function insert_Produk($dataPD){
+    function insert_Produk($data){
 
-        return $this->db->insert("tb_produk",$dataPD);
+        return $this->db->insert("tb_produk",$data);
     }
 
-    function update_Produk($id,$dataPD){
+    function update_Produk($id,$data){
         $this->db->where("id_produk",$id);
-        return $this->db->update('tb_produk',$dataPD);
+        return $this->db->update('tb_produk',$data);
     }
 
     function delete_Produk($id){

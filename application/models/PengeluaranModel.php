@@ -2,17 +2,7 @@
 
 class PengeluaranModel extends CI_Model {
 
-    function get_Detail_Pembelian(){
-        return $this->db->get("tb_detail_pembelian");
-    }
-
-    function get_Pengeluaran_Pembelian(){
-        $this->db->where('jenis_pengeluaran','Pembelian Bahan Baku');
-        return $this->db->get("tb_pengeluaran");
-    }
-
-    function get_Pengeluaran_Lainnya(){
-        $this->db->where('jenis_pengeluaran !=','Pembelian Bahan Baku');
+    function get_Pengeluaran(){
         return $this->db->get("tb_pengeluaran");
     }
 
@@ -20,18 +10,11 @@ class PengeluaranModel extends CI_Model {
         return $this->db->insert("tb_pengeluaran",$data);
     }
 
-    function insert_Detail($data){
-        return $this->db->insert("tb_detail_pembelian",$data);
-    }
+
     
     function get_PengeluaranById($id){
         $this->db->where("id_pengeluaran",$id);
         return $this->db->get("tb_pengeluaran");
-    }
-    
-    function get_DetailById($id){
-        $this->db->where("id_pengeluaran",$id);
-        return $this->db->get("tb_detail_pembelian");
     }
 
     function get_idmax(){
@@ -66,21 +49,10 @@ class PengeluaranModel extends CI_Model {
         return $this->db->update('tb_pengeluaran',$data);
     }
 
-    function update_Detail($id, $data){
-        $this->db->where("id_pengeluaran",$id);
-        return $this->db->update('tb_detail_pembelian',$data);
-    }
-
-    function delete_Detail($id){
-        $this->db->where('id_pengeluaran',$id);
-        return $this->db->delete('tb_detail_pembelian');
-    }
-
     function delete_Pengeluaran($id){
+
         $this->db->where('id_pengeluaran',$id);
-        $query = $this->db->delete('tb_kas');
-        $this->db->where('id_pengeluaran',$id);
-        return $this->db->delete('tb_pengeluaran');
+        $this->db->delete('tb_pengeluaran');
     }
 
     public function count_Pengeluaran(){
@@ -88,11 +60,6 @@ class PengeluaranModel extends CI_Model {
         $this->db->like("created_at",$date);
         $this->db->select_sum('nominal_pengeluaran');
         $query = $this->db->get('tb_pengeluaran');
-        if($query->num_rows()>0){
-            return $query->row()->nominal_pengeluaran;
-        }
-        else{
-            return 0;
-        }
+        return $query->row()->nominal_pengeluaran;
     }
 }

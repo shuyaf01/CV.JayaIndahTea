@@ -10,6 +10,8 @@ class PemasukanModel extends CI_Model {
         $this->db->where("id_pemasukan",$id);
         return $this->db->get("tb_pemasukan");
     }
+
+    
     
     function get_idmax(){
         $date=date('ymd'); 
@@ -38,19 +40,17 @@ class PemasukanModel extends CI_Model {
         return $id_pemasukan;
     }
     
-    function insert_Pemasukan($dataPM){
+    function insert_Pemasukan($data){
 
-        return $this->db->insert("tb_pemasukan",$dataPM);
+        return $this->db->insert("tb_pemasukan",$data);
     }
 
-    function update_Pemasukan($id,$dataPM){
+    function update_Pemasukan($id,$data){
         $this->db->where("id_pemasukan",$id);
-        return $this->db->update('tb_pemasukan',$dataPM);
+        return $this->db->update('tb_pemasukan',$data);
     }
 
     function delete_Pemasukan($id){
-        $this->db->where('id_pemasukan',$id);
-        $query = $this->db->delete('tb_kas');
         $this->db->where('id_pemasukan',$id);
         $query = $this->db->delete('tb_pemasukan');
         return $query;
@@ -61,12 +61,8 @@ class PemasukanModel extends CI_Model {
         $this->db->like("created_at",$date);
         $this->db->select_sum('nominal_pemasukan');
         $query = $this->db->get('tb_pemasukan');
-        if($query->num_rows()>0){
-            return $query->row()->nominal_pemasukan;
-        }
-        else{
-            return 0;
-        }
+        return $query->row()->nominal_pemasukan;
+        
     }
    
 }

@@ -21,8 +21,8 @@ class PemasukanController extends CI_Controller {
         }
     
         $this->load->model("PemasukanModel","",TRUE);
-        //$this->load->model("ProductModel","",TRUE);
-        $this->load->model("KasModel","",TRUE);
+        $this->load->model("ProdukModel","",TRUE);
+        $this->load->model("KategoriModel","",TRUE);
     }
 
     /**
@@ -40,12 +40,19 @@ class PemasukanController extends CI_Controller {
 	 */
 	protected function setValidationRules()
 	{
-		$this->form_validation->set_rules('id_pemasukan', 'ID Pemasukan', 'trim|required|max_length[128]');
-		$this->form_validation->set_rules('nama_produk', 'Nama Produk', 'trim|required');
-		$this->form_validation->set_rules('tujuan_kirim', 'tujuan_kirim', 'trim|required');
-		$this->form_validation->set_rules('berat', 'Berat Barang', 'trim|required|max_length[20]');
-		$this->form_validation->set_rules('harga_per_kg', 'Nominal', 'trim|required|max_length[20]');
+		if($this->input->post("kategori_pemasukan") == "Penjualan Produk")
+        {  
+            $this->form_validation->set_rules('nama_produk', 'Nama Produk', 'required|max_length[50]');
+            $this->form_validation->set_rules('tujuan_kirim', 'Tujuan Kirim', 'required|max_length[50]');
+            $this->form_validation->set_rules('berat', 'Berat Barang', 'numeric|required|max_length[11]');
+            $this->form_validation->set_rules('harga_per_kg', 'Nominal', 'numeric|required|max_length[20]');
 
+        } else {
+
+            $this->form_validation->set_rules('keterangan', 'Keterangan', 'required|max_length[150]');
+            $this->form_validation->set_rules('nominal', 'Nominal', 'numeric|required|max_length[20]');
+        }
+        $this->form_validation->set_message('numeric','Input %s! harus berupa angka');
         $this->form_validation->set_message('required','Kosong. Inputkan %s!');
         $this->form_validation->set_message('max_length','Nilai %s melebihi batas.');
 	}
@@ -53,9 +60,10 @@ class PemasukanController extends CI_Controller {
     function formCreate()
     {
         $data['new_id'] = $this->setIdPemasukan();
-        $data['nama_produk'] = $this->PemasukanModel->getNameProduct();
+        $data['nama_produk'] = $this->ProdukModel->get_NameProduct();
+        $data['jenis'] = $this->KategoriModel->get_KategoriPemasukan()->result();
         $this->load->view('pemasukan/create',$data);
-        $this->load->view('templates/footer'); 
+        $this->load->view('templates/footer');        
     }
  
 	public function processCreate()
@@ -64,43 +72,61 @@ class PemasukanController extends CI_Controller {
 		if ($this->form_validation->run()) 
         {
 			//Form validation success. Insert Record into database
-            $harga = $this->input->post("harga_per_kg");
-            $berat = $this->input->post("berat");
-            $nominal_pemasukan = $harga * $berat;
-
-            $dataPM = array(
-                "id_pemasukan" => $this->input->post("id_pemasukan"),
-                "nama_produk" => $this->input->post("nama_produk"),
-                "tujuan_kirim" => $this->input->post("tujuan_kirim"),
-                "jenis_pemasukan" => 'Penjualan Produk',
-                "berat" => $this->input->post("berat"),
-                "harga_per_kg" => $this->input->post("harga_per_kg"),
-                "nominal_pemasukan" => $nominal_pemasukan,
-                "nama_pegawai" => $this->session->user->nama_pegawai
-            );
+            if($this->input->post("kategori_pemasukan") == "Penjualan Produk"){
+                $harga = $this->input->post("harga_per_kg");
+                $berat = $this->input->post("berat");
+                $nominal_pemasukan = $harga * $berat;
+    
+                $dataPM = array(
+                    "id_pemasukan" => $this->input->post("id_pemasukan"),
+                    "nama_produk" => $this->input->post("nama_produk"),
+                    "tujuan_kirim" => $this->input->post("tujuan_kirim"),
+                    "kategori_pemasukan" => $this->input->post("kategori_pemasukan"),
+                    "berat" => $this->input->post("berat"),
+                    "harga_per_kg" => $this->input->post("harga_per_kg"),
+                    "nominal_pemasukan" => $nominal_pemasukan,
+                    "nama_pegawai" => $this->session->user->nama_pegawai
+                );   
+            } else {
+                $dataPM = array(
+                    "id_pemasukan" => $this->input->post("id_pemasukan"),
+                    "keterangan" => $this->input->post("keterangan"),
+                    "kategori_pemasukan" => $this->input->post("kategori_pemasukan"),
+                    "nominal_pemasukan" => $this->input->post("nominal"),
+                    "nama_pegawai" => $this->session->user->nama_pegawai
+                );  
+            }
+            
             
 			$data['created_at'] = date('Y-m-d H:i:s');
             if($this->PemasukanModel->insert_Pemasukan($dataPM)){  
-                $this->addtoKas();
+                //$this->addtoKas();
                 $this->session->set_flashdata('success', 'Data Pemasukan berhasil ditambahkan');
-                redirect(site_url("PemasukanController"));
+                redirect(site_url("income"));
             }else{
-                redirect(site_url("PemasukanController/formcreate"));
+                
+                redirect(site_url("income/formcreate"));
             }
 		}else{
             $data['new_id'] = $this->setIdPemasukan();
-            $data['nama_produk'] = $this->PemasukanModel->getNameProduct();
+            $data['nama_produk'] = $this->ProdukModel->get_NameProduct();
+            $data['jenis'] = $this->KategoriModel->get_KategoriPemasukan()->result();
             $this->load->view('pemasukan/create',$data);
             $this->load->view('templates/footer'); 
         }
     }
 
-    public function formupdate($id){
+    public function formUpdate($id){
         $record = $this->PemasukanModel->get_PemasukanById($id)->row();
-		$data['record'] = $record;
-        $data['nama_produk'] = $this->PemasukanModel->getNameProduct();
-        $this->load->view('pemasukan/update',$data);
-        $this->load->view('templates/footer'); 
+        $data['nama_produk'] = $this->ProdukModel->get_NameProduct();
+        $data['record'] = $record;
+        if($record->kategori_pemasukan == "Penjualan Produk"){
+            $this->load->view('pemasukan/update1',$data);
+            $this->load->view('templates/footer');
+        }else{
+            $this->load->view('pemasukan/update2',$data);
+            $this->load->view('templates/footer');
+        }    
     }
 
     public function processUpdate($id)
@@ -108,46 +134,66 @@ class PemasukanController extends CI_Controller {
 		$this->setValidationRules();	
 		if ($this->form_validation->run()) {
 			//Form validation success. Insert Record into database
-            $harga = $this->input->post("harga_per_kg");
-            $berat = $this->input->post("berat");
-            $nominal_pemasukan = $harga * $berat;
-
-            $dataPM = array(
-                "id_pemasukan" => $this->input->post("id_pemasukan"),
-                "nama_produk" => $this->input->post("nama_produk"),
-                "tujuan_kirim" => $this->input->post("tujuan_kirim"),
-                "jenis_pemasukan" => 'Penjualan Produk',
-                "berat" => $this->input->post("berat"),
-                "harga_per_kg" => $this->input->post("harga_per_kg"),
-                "nominal_pemasukan" => $nominal_pemasukan,
-                "nama_pegawai" => $this->session->user->nama_pegawai
-            );
+            
+            if($this->input->post("kategori_pemasukan") == "Penjualan Produk"){
+                $harga = $this->input->post("harga_per_kg");
+                $berat = $this->input->post("berat");
+                $nominal_pemasukan = $harga * $berat;
+    
+                $dataPM = array(
+                    "id_pemasukan" => $this->input->post("id_pemasukan"),
+                    "nama_produk" => $this->input->post("nama_produk"),
+                    "tujuan_kirim" => $this->input->post("tujuan_kirim"),
+                    "kategori_pemasukan" => $this->input->post("kategori_pemasukan"),
+                    "berat" => $this->input->post("berat"),
+                    "harga_per_kg" => $this->input->post("harga_per_kg"),
+                    "nominal_pemasukan" => $nominal_pemasukan,
+                    "nama_pegawai" => $this->session->user->nama_pegawai
+                );   
+            } else {
+                $dataPM = array(
+                    "id_pemasukan" => $this->input->post("id_pemasukan"),
+                    "keterangan" => $this->input->post("keterangan"),
+                    "kategori_pemasukan" => $this->input->post("kategori_pemasukan"),
+                    "nominal_pemasukan" => $this->input->post("nominal"),
+                    "nama_pegawai" => $this->session->user->nama_pegawai
+                );  
+            }
 
 			$dataPM['updated_at'] = date('Y-m-d H:i:s');
-                
             if($this->PemasukanModel->update_Pemasukan($id,$dataPM))
             {  
-                $this->KasModel->delete_Kas($id);
-                $this->addtoKas();
-                $this->session->set_flashdata('info', 'Data Pemasukan berhasil diedit');
-                redirect(site_url("PemasukanController"));
+                //$this->KasModel->delete_Kas($id);
+                //$this->addtoKas();
+                $this->session->set_flashdata('success', 'Data Pemasukan berhasil diedit');
+                redirect(site_url("income"));
             }else{
-                redirect(site_url("PemasukanController/formupdate"));
+                redirect(site_url("income/formupdate"));
             }
 		}else{
-            $record= $this->PemasukanModel->get_PemasukanById($id)->row();
+            $record = $this->PemasukanModel->get_PemasukanById($id)->row();
+            $data['nama_produk'] = $this->ProdukModel->get_NameProduct();
             $data['record'] = $record;
-            $data['new_id'] = $this->setIdPemasukan();
-            $this->load->view('pemasukan/create',$data);
-            $this->load->view('templates/footer');  
+            if($record->kategori_pemasukan == "Penjualan Produk"){
+                $this->load->view('pemasukan/update1',$data);
+                $this->load->view('templates/footer');
+            }else{
+                $this->load->view('pemasukan/update2',$data);
+                $this->load->view('templates/footer');
+            }
         }
     }
 
     public function readbyid($id){
         $record = $this->PemasukanModel->get_PemasukanById($id)->row();
-		$data['record'] = $record;
-        $this->load->view('pemasukan/read',$data);
-        $this->load->view('templates/footer'); 
+		$data['record'] = $record; 
+        if($record->kategori_pemasukan == 'Penjualan Produk'){
+            $this->load->view('pemasukan/read1',$data);
+            $this->load->view('templates/footer'); 
+        }else{
+            $this->load->view('pemasukan/read2',$data);
+            $this->load->view('templates/footer'); 
+        }
     }
     
     public function setIdPemasukan(){
@@ -159,46 +205,30 @@ class PemasukanController extends CI_Controller {
             }
             return $id_pemasukan = $this->PemasukanModel->get_newid($auto_id,'PM-');
         } 
-    }
-  
+    } 
+
+     /** 
+     * Method untuk menyimpan data Pemasukan berdasarkan id dalam bentuk pdf
+     * Menggunakan plugin DOMPDF
+     */
     function get_download_byid($id)
     {
-        $record = $this->PemasukanModel->get_PemasukanById($id)->row();
-		$data['record'] = $record;
-        
-
-        $this->load->library('pdf');
-        
-        $html = $this->load->view('pemasukan/generatepdf_byid', $data, true);
-        $this->pdf->createPDF($html, 'Bukti Pembayaran', false);
+        $this->load->library('pdf'); 
+		$record = $this->PemasukanModel->get_PemasukanById($id)->row();
+		$data['record'] = $record; 
+        if($record->kategori_pemasukan == 'Penjualan Produk'){ 
+            $html = $this->load->view('pemasukan/generatepdf_byid1', $data, true);
+            $this->pdf->createPDF($html, 'Tanda Bukti Pembayaran - '.$id, false);
+        }else{
+            $html = $this->load->view('pemasukan/generatepdf_byid2', $data, true);
+            $this->pdf->createPDF($html, 'Tanda Bukti Pembayaran - '.$id, false);
+        }   
     }
  
-    public function addtoKas()
-	{  
-        $harga = $this->input->post("harga_per_kg");
-        $berat = $this->input->post("berat");
-        $nominal_pemasukan = $harga * $berat;
-
-        //menghitung saldo
-        $last_saldo = $this->KasModel->get_lastSaldo()->result();
-        if($last_saldo > 0) {
-            foreach ($last_saldo as $key) {
-                $new_saldo = $key->saldo + $nominal_pemasukan;
-            }
-        }   
-
-		$dataKas = array(
-            "id_pemasukan" => $this->input->post("id_pemasukan"),
-            "jenis_pemasukan" => 'Penjualan Produk',
-            "nominal_pemasukan" => $nominal_pemasukan,
-            "saldo" => $new_saldo
-        );
-        $this->KasModel->insert_Kas($dataKas);
-    }
 
     public function processDelete($id){
         $this->PemasukanModel->delete_Pemasukan($id);
         $this->session->set_flashdata("info", "Data Pemasukan Berhasil Dihapus!");
-        redirect(site_url("PemasukanController"));
+        redirect(site_url("income"));
     }
 }
